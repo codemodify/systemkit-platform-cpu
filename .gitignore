@@ -10,4 +10,5 @@
 **/*.log
 
 # ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~
-.helper-files/.vagrant
+cli/helper-files/.vagrant
+cli/helper-files/temp-*

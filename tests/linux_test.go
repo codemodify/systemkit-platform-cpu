@@ -4,14 +4,20 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
-	platforms "github.com/codemodify/systemkit-platform"
+	platform "github.com/codemodify/systemkit-platform"
 )
 
 func TestCPUVariant(t *testing.T) {
-	info := platforms.GetInfo()
+	data, err := json.Marshal(platform.GetInfo())
+	if err != nil {
+		fmt.Println(err.Error())
+		t.Fatal(err.Error())
+	}
 
-	fmt.Println(info.Platform())
+	dataAsString := string(data)
+	fmt.Println(dataAsString)
 }

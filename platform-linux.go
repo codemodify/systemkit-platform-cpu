@@ -5,48 +5,56 @@ package platform
 
 import (
 	"bufio"
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
-
-	"github.com/containerd/containerd/errdefs"
-	"github.com/pkg/errors"
 )
 
 // GetInfo -
-func GetInfo() Info {
-	return linuxInfo{}
-}
+func GetInfo() Platform {
+	count := fetchCPUInfo2("Socket(s):")
+	countAsInt, _ := strconv.Atoi(count)
 
-// LinuxInfo -
-type linuxInfo struct{}
+	coresPerCPUCount := fetchCPUInfo2("Core(s) per socket:")
+	coresPerCPUCountAsInt, _ := strconv.Atoi(coresPerCPUCount)
 
-// Platform -
-func (thisRef linuxInfo) Platform() Platform {
-	coresCount, _ := getCPUInfo("cpu cores")
-	coresCountAsInt, _ := strconv.Atoi(coresCount)
+	threadsPerCoreCount := fetchCPUInfo2("Thread(s) per core:")
+	threadsPerCoreCountAsInt, _ := strconv.Atoi(threadsPerCoreCount)
+
 	return Platform{
 		OS: OS{
 			Name:     getOS(),
-			Version:  "",
+			Version:  getKernelVersion(),
 			Features: []string{},
 		},
 		CPU: CPU{
-			Count:        1,
-			CoresCount:   coresCountAsInt,
-			TotalThreads: runtime.NumCPU(),
-			Architecture: getCPUArchitecture(),
+			Count:          countAsInt,
+			CoresPerCPU:    coresPerCPUCountAsInt,
+			ThreadsPerCore: threadsPerCoreCountAsInt,
+			TotalThreads:   runtime.NumCPU(),
+			Architecture:   getCPUArchitecture(),
 			Variant: CPUVariant{
 				Name:     getCPUVariant(),
 				Detailed: getCPUVariantDetailed(),
 			},
-			Manufacturer: "intel",
-			Features:     []string{},
+			Manufacturer: fetchCPUInfo2("Vendor ID:"),
+			ByteOrder:    fetchCPUInfo2("Byte Order:"),
+			Features: []string{
+				fetchCPUInfo2("Flags:"),
+			},
 		},
 		Metadata: Metadata{
-			"goos":   runtime.GOOS,
-			"goarch": runtime.GOOS,
+			"goos":          runtime.GOOS,
+			"goarch":        runtime.GOARCH,
+			"model name":    fetchCPUInfo("model name"),
+			"Model name":    fetchCPUInfo2("Model name:"),
+			"bugs":          fetchCPUInfo("bugs"),
+			"Vulnerability": fetchCPUInfo2All("Vulnerability"),
 		},
 	}
 }
@@ -55,10 +63,10 @@ func (thisRef linuxInfo) Platform() Platform {
 //		The kernel has already detected the ABI, ISA and Features.
 //		We don't need to access the ARM registers to detect platform information.
 //		We can just parse these information from /proc/cpuinfo
-func getCPUInfo(pattern string) (info string, err error) {
+func fetchCPUInfo(pattern string) string {
 	cpuinfo, err := os.Open("/proc/cpuinfo")
 	if err != nil {
-		return "", err
+		return ""
 	}
 	defer cpuinfo.Close()
 
@@ -69,22 +77,136 @@ func getCPUInfo(pattern string) (info string, err error) {
 		list := strings.Split(newline, ":")
 
 		if len(list) > 1 && strings.EqualFold(strings.TrimSpace(list[0]), pattern) {
-			return strings.TrimSpace(list[1]), nil
+			return strings.TrimSpace(list[1])
 		}
 	}
 
 	// Check whether the scanner encountered errors
 	err = scanner.Err()
 	if err != nil {
-		return "", err
+		return ""
 	}
 
-	return "", errors.Wrapf(errdefs.ErrNotFound, "getCPUInfo for pattern: %s", pattern)
+	return ""
+}
+
+type LscpuFieldData struct {
+	Field string `json:"field"`
+	Data  string `json:"data"`
+}
+
+type LscpuOutput struct {
+	Lscpu []LscpuFieldData `json:"lscpu"`
+}
+
+func fetchCPUInfo2(pattern string) string {
+	cmd := exec.Command("lscpu", "--json")
+	cmd.Stdin = strings.NewReader("")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		return ""
+	}
+
+	outputAsString := strings.TrimSpace(out.String())
+
+	// fmt.Println(outputAsString)
+
+	lscpuO := LscpuOutput{}
+	err = json.Unmarshal([]byte(outputAsString), &lscpuO)
+	if err != nil {
+		return ""
+	}
+
+	for _, v := range lscpuO.Lscpu {
+		if strings.Index(v.Field, pattern) != -1 {
+			return v.Data
+		}
+	}
+
+	return ""
+}
+
+func fetchCPUInfo2All(pattern string) []string {
+	cmd := exec.Command("lscpu", "--json")
+	cmd.Stdin = strings.NewReader("")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		return []string{}
+	}
+
+	type lscpuFieldData struct {
+		field string `json:"field"`
+		data  string `json:"data"`
+	}
+
+	type lscpuOutput struct {
+		lscpu []lscpuFieldData `json:"lscpu"`
+	}
+
+	outputAsString := strings.TrimSpace(out.String())
+	var lscpuO lscpuOutput
+	err = json.Unmarshal([]byte(outputAsString), &lscpuO)
+	if err != nil {
+		return []string{}
+	}
+
+	theList := []string{}
+	for _, v := range lscpuO.lscpu {
+		if strings.Index(v.field, pattern) != -1 {
+			theList = append(theList, fmt.Sprintf("%s : %s", v.field, v.data))
+		}
+	}
+
+	return theList
+}
+
+func getPhysicalCPUCount() int {
+	cpuinfo, err := os.Open("/proc/cpuinfo")
+	if err != nil {
+		return 0
+	}
+	defer cpuinfo.Close()
+
+	pattern := "physical id"
+	scanner := bufio.NewScanner(cpuinfo)
+	allLines := []string{}
+	for scanner.Scan() {
+		newline := scanner.Text()
+		if strings.Index(newline, pattern) != -1 {
+			list := strings.Split(newline, ":")
+			if len(list) > 1 && strings.EqualFold(strings.TrimSpace(list[0]), pattern) {
+				allLines = append(allLines, strings.TrimSpace(list[1]))
+			}
+		}
+	}
+
+	// Check whether the scanner encountered errors
+	err = scanner.Err()
+	if err != nil {
+		return 0
+	}
+
+	if len(allLines) > 0 {
+		cpuCountAsInt, err := strconv.Atoi(allLines[len(allLines)-1])
+		if err == nil {
+			return cpuCountAsInt + 1
+		}
+	}
+
+	return 0
 }
 
 func getCPUVariant() CPUArchitectureVariant {
-	variantAsString, err := getCPUInfo("Cpu architecture")
-	if err != nil {
+	variantAsString := fetchCPUInfo("Cpu architecture")
+	if variantAsString == "" {
 		return ""
 	}
 
@@ -119,8 +241,8 @@ func getCPUVariant() CPUArchitectureVariant {
 }
 
 func getCPUVariantDetailed() CPUArchitectureVariantDetailed {
-	variantAsString, err := getCPUInfo("Cpu architecture")
-	if err != nil {
+	variantAsString := fetchCPUInfo("Cpu architecture")
+	if variantAsString == "" {
 		return ""
 	}
 
@@ -166,4 +288,19 @@ func getCPUVariantDetailed() CPUArchitectureVariantDetailed {
 	}
 
 	return CPUV_Uknown
+}
+
+func getKernelVersion() string {
+	cmd := exec.Command("uname", "-r")
+	cmd.Stdin = strings.NewReader("")
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		return ""
+	}
+
+	return strings.TrimSpace(out.String())
 }
