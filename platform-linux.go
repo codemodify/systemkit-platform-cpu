@@ -243,51 +243,30 @@ func getCPUVariant() CPUArchitectureVariant {
 func getCPUVariantDetailed() CPUArchitectureVariantDetailed {
 	variantAsString := fetchCPUInfo("Cpu architecture")
 	if variantAsString == "" {
-		return ""
+		return CPUVD_Uknown
 	}
 
 	switch strings.ToLower(variantAsString) {
-	case "8", "aarch64":
-		// special case:
-		//	if running a 32-bit userspace on aarch64,
-		//	the variant should be "v7"
-		if runtime.GOARCH == "arm" {
-			return CPUV_ARMv7
-		}
-
-		return CPUV_ARMv8
-
-	case "7":
-		return CPUV_ARMv7
 	case "7m":
-		return CPUV_ARMv7_M
+		return CPUVD_ARMv7_M
 	case "?(12)", "?(13)", "?(14)", "?(15)", "?(16)", "?(17)":
 		return CPUV_ARMv7
 
-	case "6":
-		return CPUV_ARMv6
 	case "6tej":
-		return CPUV_ARMv6TEJ
+		return CPUVD_ARMv6TEJ
 
-	case "5":
-		return CPUV_ARMv5
 	case "5t":
-		return CPUV_ARMv5T
+		return CPUVD_ARMv5T
 	case "5te":
-		return CPUV_ARMv5TE
+		return CPUVD_ARMv5TE
 	case "5tej":
-		return CPUV_ARMv5TEJ
+		return CPUVD_ARMv5TEJ
 
-	case "4":
-		return CPUV_ARMv4
 	case "4t":
-		return CPUV_ARMv4T
-
-	case "3":
-		return CPUV_ARMv3
+		return CPUVD_ARMv4T
 	}
 
-	return CPUV_Uknown
+	return CPUVD_Uknown
 }
 
 func getKernelVersion() string {
