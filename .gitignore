@@ -8,7 +8,6 @@
 
 # ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~
 **/*.log
-
-# ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~ ~~~~
-cli/helper-files/.vagrant
-cli/helper-files/temp-*
+**/temp*
+**/.vagrant
+cmd/cmd

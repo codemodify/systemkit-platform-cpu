@@ -1,0 +1,6 @@
+github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=
+github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d/go.mod h1:3eOhrUMpNV+6aFIbp5/iudMxNCF27Vw2OZgy4xEx0Fg=
+github.com/codemodify/systemkit-platform v1.1.0 h1:g1umNTjVaURmhUdqogZKL/HYSdxE407FXWF12ty9ahM=
+github.com/codemodify/systemkit-platform v1.1.0/go.mod h1:HdMgbCPaxP4dTx9LvmQdg3X4lIa5St3erhUgtQMH01s=
+github.com/go-ole/go-ole v1.2.4 h1:nNBDSCOigTSiarFpYE9J/KtEA1IOW4CNeqT9TQDqCxI=
+github.com/go-ole/go-ole v1.2.4/go.mod h1:XCwSNxSkXRo4vlyPy93sltvi/qJq0jqQhjqQNIwKuxM=

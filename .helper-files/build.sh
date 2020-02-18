@@ -4,16 +4,14 @@ SUPPORTED_TARGETS=(
   "linux,amd64"
   "linux,arm"
   "linux,arm64"
-
-#   "freebsd,amd64,true"
-#   "openbsd,amd64,true"
-#   "netbsd,amd64,true"
-#   "dragonfly,amd64"
-#   "plan9,amd64"
-#   "solaris,amd64"
-
-#   "darwin,amd64"
-#   "windows,amd64"
+  "freebsd,amd64,true"
+  "openbsd,amd64,true"
+  "netbsd,amd64,true"
+  "dragonfly,amd64"
+  "plan9,amd64"
+  "solaris,amd64"
+  "darwin,amd64"
+  "windows,amd64"
 )
 
 OUTPUTFOLDER=./temp-build
@@ -23,8 +21,6 @@ clear
 echo ""
 echo "Build PARAMS"
 echo "    -> OUTPUTFOLDER             : ${OUTPUTFOLDER}"
-echo "    -> ENV                      : ${ENV}"
-echo "    -> VERSION                  : ${VERSION}"
 echo ""
 
 
@@ -44,13 +40,13 @@ for target in "${SUPPORTED_TARGETS[@]}"; do
   printf "Building %s" ${os}.${arch}
   echo ""
 
-  fullOutputFilePath="$OUTPUTFOLDER/systemkit-platform-cli.${os}.${arch}${ext}"
-  GOOS=${os} GOARCH=${arch} go build -ldflags "${LDFLAGS}" -o ${fullOutputFilePath} ../
+  fullOutputFilePath="$OUTPUTFOLDER/systemkit-platform-cpu.${os}.${arch}${ext}"
+  GOOS=${os} GOARCH=${arch} go build -ldflags "${LDFLAGS}" -o ${fullOutputFilePath} ../cmd
 
  done
 
 echo ""
-
+chmod +x $OUTPUTFOLDER/*
 
 
 

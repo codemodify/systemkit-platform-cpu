@@ -1,4 +1,4 @@
-package platform
+package cpu
 
 import (
 	"fmt"
@@ -6,43 +6,36 @@ import (
 	"strings"
 )
 
-func getOS() OSName {
-	runtimeOSName := strings.ToLower(runtime.GOOS)
-	runtimeOSName = normalizeOS(runtimeOSName)
-
-	for _, osName := range supportedOses {
-		osNameAsLowerCase := strings.ToLower(fmt.Sprintf("%v", osName))
-		if strings.Index(osNameAsLowerCase, runtimeOSName) != -1 {
-			return osName
-		}
-	}
-
-	return OS_Uknown
-}
-
-func normalizeOS(os string) string {
-	os = strings.ToLower(os)
-
-	switch os {
-	case "macos":
-		os = OS_Darwin
-	}
-
-	return os
-}
-
-func getCPUArchitecture() CPUArchitecture {
-	runtimeArchName := strings.ToLower(runtime.GOARCH)
-	runtimeArchName, _ = normalizeArch(runtimeArchName, "")
+func getCPUArchitectureFromString(archNameToCheck string) CPUArchitecture {
+	archNameToCheck = strings.ToLower(archNameToCheck)
+	archNameToCheck, _ = normalizeArch(archNameToCheck, "")
 
 	for _, cpuArchitecture := range supportedCPUArchitectures {
 		cpuArchitectureAsLowerCase := strings.ToLower(fmt.Sprintf("%v", cpuArchitecture))
-		if strings.Index(cpuArchitectureAsLowerCase, runtimeArchName) != -1 {
+		if strings.Index(cpuArchitectureAsLowerCase, archNameToCheck) != -1 {
 			return cpuArchitecture
 		}
 	}
 
 	return CPU_Uknown
+}
+
+func getCPUArchitecture() CPUArchitecture {
+	return getCPUArchitectureFromString(runtime.GOARCH)
+}
+
+func getCPUArchitectureVariantFromString(archNameToCheck string) CPUArchitectureVariant {
+	archNameToCheck = strings.ToLower(archNameToCheck)
+	archNameToCheck, _ = normalizeArch(archNameToCheck, "")
+
+	for _, cpuArchitectureV := range supportedCPUArchitectureVariants {
+		cpuArchitectureVAsLowerCase := strings.ToLower(fmt.Sprintf("%v", cpuArchitectureV))
+		if strings.Index(cpuArchitectureVAsLowerCase, archNameToCheck) != -1 {
+			return cpuArchitectureV
+		}
+	}
+
+	return CPUV_Uknown
 }
 
 func normalizeArch(arch, variant string) (string, string) {

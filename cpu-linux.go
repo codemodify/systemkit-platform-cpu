@@ -1,7 +1,6 @@
-// +build linux
-// +build !android
+// +build !windows
 
-package platform
+package cpu
 
 import (
 	"bufio"
@@ -15,8 +14,8 @@ import (
 	"strings"
 )
 
-// GetInfo -
-func GetInfo() Platform {
+// Info -
+func Info() CPU {
 	count := fetchCPUInfo2("Socket(s):")
 	countAsInt, _ := strconv.Atoi(count)
 
@@ -26,29 +25,22 @@ func GetInfo() Platform {
 	threadsPerCoreCount := fetchCPUInfo2("Thread(s) per core:")
 	threadsPerCoreCountAsInt, _ := strconv.Atoi(threadsPerCoreCount)
 
-	return Platform{
-		OS: OS{
-			Name:     getOS(),
-			Version:  getKernelVersion(),
-			Features: []string{},
+	return CPU{
+		Count:          countAsInt,
+		CoresPerCPU:    coresPerCPUCountAsInt,
+		ThreadsPerCore: threadsPerCoreCountAsInt,
+		TotalThreads:   runtime.NumCPU(),
+		Architecture:   getCPUArchitecture(),
+		Variant: CPUVariant{
+			Name:     getCPUVariant(),
+			Detailed: getCPUVariantDetailed(),
 		},
-		CPU: CPU{
-			Count:          countAsInt,
-			CoresPerCPU:    coresPerCPUCountAsInt,
-			ThreadsPerCore: threadsPerCoreCountAsInt,
-			TotalThreads:   runtime.NumCPU(),
-			Architecture:   getCPUArchitecture(),
-			Variant: CPUVariant{
-				Name:     getCPUVariant(),
-				Detailed: getCPUVariantDetailed(),
-			},
-			Manufacturer: fetchCPUInfo2("Vendor ID:"),
-			ByteOrder:    fetchCPUInfo2("Byte Order:"),
-			Features: []string{
-				fetchCPUInfo2("Flags:"),
-			},
+		Manufacturer: fetchCPUInfo2("Vendor ID:"),
+		ByteOrder:    fetchCPUInfo2("Byte Order:"),
+		Features: []string{
+			fetchCPUInfo2("Flags:"),
 		},
-		Metadata: Metadata{
+		AdditionalInfo: AdditionalInfo{
 			"goos":          runtime.GOOS,
 			"goarch":        runtime.GOARCH,
 			"model name":    fetchCPUInfo("model name"),

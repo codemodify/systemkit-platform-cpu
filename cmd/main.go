@@ -5,17 +5,19 @@ import (
 	"fmt"
 	"os"
 
-	platform "github.com/codemodify/systemkit-platform"
+	platformCPU "github.com/codemodify/systemkit-platform-cpu"
 )
 
 func main() {
-	data, err := json.Marshal(platform.GetInfo())
+	cpuInfo := platformCPU.Info()
+
+	data, err := json.Marshal(cpuInfo)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
 	if len(os.Args) > 1 && os.Args[1] == "-p" {
-		data, err = json.MarshalIndent(platform.GetInfo(), "", "    ")
+		data, err = json.MarshalIndent(cpuInfo, "", "    ")
 		if err != nil {
 			fmt.Println(err.Error())
 		}
