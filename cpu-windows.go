@@ -17,17 +17,6 @@ func Info() CPU {
 		}
 	}
 
-	// converting into standard structures
-	// info.Processors = ctx.processorsGet(win32descriptions)
-	// var totCores uint32
-	// var totThreads uint32
-	// for _, p := range info.Processors {
-	// 	totCores += p.NumCores
-	// 	totThreads += p.NumThreads
-	// }
-	// info.TotalCores = totCores
-	// info.TotalThreads = totThreads
-
 	if len(win32descriptions) <= 0 {
 		return CPU{
 			Architecture: CPU_Uknown,
