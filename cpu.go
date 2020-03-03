@@ -1,10 +1,19 @@
 package cpu
 
+import (
+	"bytes"
+	"encoding/binary"
+	"encoding/hex"
+
+	"golang.org/x/crypto/sha3"
+)
+
 // AdditionalInfo -
 type AdditionalInfo map[string]interface{}
 
 // CPU -
 type CPU struct {
+	ID             string          `json:"id,omitempty"`             // SHA-3 hash of on all fields except any arrays or maps
 	Count          int             `json:"count,omitempty"`          // nr of physical CPUs
 	CoresPerCPU    int             `json:"coresPerCPU,omitempty"`    // nr of Cores per CPU
 	ThreadsPerCore int             `json:"threadsPerCore,omitempty"` // nr of Threads per Core
@@ -15,6 +24,29 @@ type CPU struct {
 	ByteOrder      string          `json:"byteOrder,omitempty"`      //
 	Features       []string        `json:"features,omitempty"`       // ex: `SWPB (swap) instructions` for ARM
 	AdditionalInfo AdditionalInfo  `json:"additionalInfo,omitempty"` //
+}
+
+func (thisRef *CPU) setID() {
+	var values = []interface{}{
+		thisRef.Count,
+		thisRef.CoresPerCPU,
+		thisRef.ThreadsPerCore,
+		thisRef.TotalThreads,
+		thisRef.Architecture,
+		thisRef.Variant,
+		thisRef.Manufacturer,
+		thisRef.ByteOrder,
+	}
+	buffer := new(bytes.Buffer)
+	for _, value := range values {
+		err := binary.Write(buffer, binary.BigEndian, value)
+		if err != nil {
+			return []byte{}
+		}
+	}
+
+	hash := sha3.Sum512(buffer.Bytes())
+	thisRef.ID = hex.EncodeToString(hash[:])
 }
 
 // CPUVariant -

@@ -23,7 +23,7 @@ func Info() CPU {
 		}
 	}
 
-	return CPU{
+	cpuInfo := CPU{
 		Count:          len(win32descriptions),
 		CoresPerCPU:    int(win32descriptions[0].NumberOfCores),
 		ThreadsPerCore: int(win32descriptions[0].NumberOfLogicalProcessors),
@@ -38,6 +38,10 @@ func Info() CPU {
 			"goarch": runtime.GOARCH,
 		},
 	}
+
+	cpuInfo.setID()
+
+	return cpuInfo
 }
 
 const wmqlProcessor = "SELECT Manufacturer, Name, NumberOfLogicalProcessors, NumberOfCores FROM Win32_Processor"

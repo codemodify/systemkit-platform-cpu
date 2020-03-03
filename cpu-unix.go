@@ -25,7 +25,7 @@ func Info() CPU {
 	threadsPerCoreCount := fetchCPUInfo2("Thread(s) per core:")
 	threadsPerCoreCountAsInt, _ := strconv.Atoi(threadsPerCoreCount)
 
-	return CPU{
+	cpuInfo := CPU{
 		Count:          countAsInt,
 		CoresPerCPU:    coresPerCPUCountAsInt,
 		ThreadsPerCore: threadsPerCoreCountAsInt,
@@ -49,6 +49,10 @@ func Info() CPU {
 			"Vulnerability": fetchCPUInfo2All("Vulnerability"),
 		},
 	}
+
+	cpuInfo.setID()
+
+	return cpuInfo
 }
 
 // On Linux
