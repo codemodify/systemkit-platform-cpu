@@ -6,4 +6,5 @@ require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d
 	github.com/codemodify/systemkit-platform v1.1.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
+	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 )

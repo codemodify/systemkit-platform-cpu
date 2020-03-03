@@ -36,6 +36,7 @@ func Info() CPU {
 			Detailed: getCPUVariantDetailed(),
 		},
 		Manufacturer: fetchCPUInfo2("Vendor ID:"),
+		Model:        fetchCPUInfo2("Model name:"),
 		ByteOrder:    fetchCPUInfo2("Byte Order:"),
 		Features: []string{
 			fetchCPUInfo2("Flags:"),
@@ -48,6 +49,10 @@ func Info() CPU {
 			"bugs":          fetchCPUInfo("bugs"),
 			"Vulnerability": fetchCPUInfo2All("Vulnerability"),
 		},
+	}
+
+	if len(strings.TrimSpace(cpuInfo.Model)) == 0 {
+		cpuInfo.Model = fetchCPUInfo("model name")
 	}
 
 	cpuInfo.setID()
@@ -86,11 +91,13 @@ func fetchCPUInfo(pattern string) string {
 	return ""
 }
 
+// LscpuFieldData -
 type LscpuFieldData struct {
 	Field string `json:"field"`
 	Data  string `json:"data"`
 }
 
+// LscpuOutput -
 type LscpuOutput struct {
 	Lscpu []LscpuFieldData `json:"lscpu"`
 }

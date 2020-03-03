@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 
 	"golang.org/x/crypto/sha3"
 )
@@ -21,6 +22,7 @@ type CPU struct {
 	Architecture   CPUArchitecture `json:"architecture,omitempty"`   // ex: `amd64` or `ppc64`
 	Variant        CPUVariant      `json:"variant,omitempty"`        //
 	Manufacturer   string          `json:"manufacturer,omitempty"`   // intel, amd, arm
+	Model          string          `json:"model,omitempty"`          // Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz
 	ByteOrder      string          `json:"byteOrder,omitempty"`      //
 	Features       []string        `json:"features,omitempty"`       // ex: `SWPB (swap) instructions` for ARM
 	AdditionalInfo AdditionalInfo  `json:"additionalInfo,omitempty"` //
@@ -35,11 +37,12 @@ func (thisRef *CPU) setID() {
 		thisRef.Architecture,
 		thisRef.Variant,
 		thisRef.Manufacturer,
+		thisRef.Model,
 		thisRef.ByteOrder,
 	}
 	buffer := new(bytes.Buffer)
 	for _, value := range values {
-		err := binary.Write(buffer, binary.BigEndian, value)
+		err := binary.Write(buffer, binary.BigEndian, []byte(fmt.Sprintf("%v", value)))
 		if err != nil {
 			return
 		}

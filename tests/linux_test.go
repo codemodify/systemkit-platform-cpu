@@ -12,7 +12,10 @@ import (
 )
 
 func TestCPUVariant(t *testing.T) {
-	data, err := json.Marshal(platformCPU.Info())
+	cpuInfo := platformCPU.Info()
+	fmt.Println(cpuInfo.ID)
+
+	data, err := json.Marshal(cpuInfo)
 	if err != nil {
 		fmt.Println(err.Error())
 		t.Fatal(err.Error())
