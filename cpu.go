@@ -41,7 +41,7 @@ func (thisRef *CPU) setID() {
 	for _, value := range values {
 		err := binary.Write(buffer, binary.BigEndian, value)
 		if err != nil {
-			return []byte{}
+			return
 		}
 	}
 
