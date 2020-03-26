@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	platform "github.com/codemodify/systemkit-platform"
+	platform "github.com/codemodify/systemkit-platform-cpu"
 )
 
 func TestJSON(t *testing.T) {
