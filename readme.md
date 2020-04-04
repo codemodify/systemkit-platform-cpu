@@ -18,6 +18,8 @@
 ![](https://img.shields.io/github/forks/codemodify/systemkit-platform-cpu?style=flat-square)
 
 #### Detailed CPU Detection at Runtime
+#### Supported: Linux, Raspberry Pi, FreeBSD, Mac OS, Windows, Solaris
+
 # ![](https://fonts.gstatic.com/s/i/materialicons/bookmarks/v4/24px.svg) Install
 ```go
 go get github.com/codemodify/systemkit-platform-cpu
